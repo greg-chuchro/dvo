@@ -104,6 +104,11 @@ case "$command" in
     rebase)
         ISSUE_NUMBER=$(git branch --show-current)
         ISSUE_TITLE=$(gh issue view $ISSUE_NUMBER | rgx r '(.*)title:\s*([^\n]+)(.*)/$2')
+        COMMITS_COUNT=$(git rev-list --count dev..$ISSUE_NUMBER)
+        if [ $COMMITS_COUNT -lt 2 ]; then
+            echo "nothing to rebase"
+            exit 0
+        fi
         git push --force
         git stash push --include-untracked --quiet
         git reset $(git merge-base dev $ISSUE_NUMBER)
