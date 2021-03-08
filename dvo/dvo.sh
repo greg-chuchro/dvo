@@ -40,7 +40,7 @@ case "$command" in
         PROJECT_KEBAB_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[_ ]/-' | rgx r '\./')
         PROJECT_SNEAK_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[- ]/_' | rgx r '\./')
 
-        cd ~"repos/$(git config user.name)"
+        cd ~/"repos/$(git config user.name)"
         mkdir $PROJECT_KEBAB_NAME
         cd $PROJECT_KEBAB_NAME
 
