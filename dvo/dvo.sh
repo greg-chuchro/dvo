@@ -110,13 +110,21 @@ case "$command" in
             exit 0
         fi
         git push --force
+        set +e
+        STASH_COUNT=$(git rev-list --walk-reflogs --count refs/stash)
+        set -e
         git stash push --include-untracked --quiet
+        set +e
+        NEW_STASH_COUNT=$(git rev-list --walk-reflogs --count refs/stash)
+        set -e
         git reset $(git merge-base dev $ISSUE_NUMBER)
         git add -A
         set +e
         git commit -m "#$ISSUE_NUMBER $ISSUE_TITLE"
-        git stash pop --quiet
         set -e
+        if [ "$NEW_STASH_COUNT" != "$STASH_COUNT" ]; then
+            git stash pop --quiet
+        fi
         git pull --rebase origin dev
         ;;
     pr)
