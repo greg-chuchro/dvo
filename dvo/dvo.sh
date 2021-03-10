@@ -107,6 +107,12 @@ case "$command" in
         COMMITS_COUNT=$(git rev-list --count dev..$ISSUE_NUMBER)
         if [ $COMMITS_COUNT -lt 2 ]; then
             echo "nothing to rebase"
+            if [ $COMMITS_COUNT -eq 1 ]; then
+                LAST_COMMIT_MESSAGE=$(git show -s --format=%s)
+                if [ "$LAST_COMMIT_MESSAGE" != "#$ISSUE_NUMBER $ISSUE_TITLE" ]; then
+                    git commit --amend -m "#$ISSUE_NUMBER $ISSUE_TITLE"
+                fi
+            fi
             exit 0
         fi
         git push --force
