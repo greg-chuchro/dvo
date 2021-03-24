@@ -38,7 +38,7 @@ case "$command" in
         fi
 
         PROJECT_KEBAB_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[_ ]/-' | rgx r '\./')
-        PROJECT_SNEAK_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[- ]/_' | rgx r '\./')
+        PROJECT_SNAKE_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[- ]/_' | rgx r '\./')
 
         cd ~/"repos/$(git config user.name)"
         mkdir $PROJECT_KEBAB_NAME
@@ -47,8 +47,8 @@ case "$command" in
         if [ "$PROJECT_TYPE" = 'shell' ]; then
             mkdir $PROJECT_NAME
             cd $PROJECT_NAME
-            touch $PROJECT_SNEAK_NAME".sh"
-            chmod +x $PROJECT_SNEAK_NAME".sh"
+            touch $PROJECT_SNAKE_NAME".sh"
+            chmod +x $PROJECT_SNAKE_NAME".sh"
             cd ..
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,visualstudiocode > .gitignore
         else
@@ -57,7 +57,7 @@ case "$command" in
             TEST_PROJECT_FILE=$TEST_PROJECT_NAME"/"$TEST_PROJECT_NAME".csproj"
             SOLUTION_FILE=$PROJECT_NAME".sln"
 
-            dotnet new $ARGS
+            dotnet new $PROJECT_TYPE -n $PROJECT_NAME
             dotnet new xunit -n $TEST_PROJECT_NAME
             dotnet new sln -n $PROJECT_NAME
             dotnet add $TEST_PROJECT_FILE reference $PROJECT_FILE
