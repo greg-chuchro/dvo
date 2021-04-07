@@ -104,10 +104,11 @@ case "$command" in
     rebase)
         ISSUE_NUMBER=$(git branch --show-current)
         ISSUE_TITLE=$(gh issue view $ISSUE_NUMBER | rgx r '(.*)title:\s*([^\n]+)(.*)/$2')
-        COMMITS_COUNT=$(git rev-list --count dev..$ISSUE_NUMBER)
-        if [ $COMMITS_COUNT -lt 2 ]; then
+        DEV_COMMITS_COUNT=$(git rev-list --count $ISSUE_NUMBER..dev)
+        BRANCH_COMMITS_COUNT=$(git rev-list --count dev..$ISSUE_NUMBER)
+        if [ $DEV_COMMITS_COUNT -eq 0 ] && [ $BRANCH_COMMITS_COUNT -lt 2 ]; then
             echo "nothing to rebase"
-            if [ $COMMITS_COUNT -eq 1 ]; then
+            if [ $BRANCH_COMMITS_COUNT -eq 1 ]; then
                 LAST_COMMIT_MESSAGE=$(git show -s --format=%s)
                 if [ "$LAST_COMMIT_MESSAGE" != "#$ISSUE_NUMBER $ISSUE_TITLE" ]; then
                     git commit --amend -m "#$ISSUE_NUMBER $ISSUE_TITLE"
