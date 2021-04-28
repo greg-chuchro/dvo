@@ -1,0 +1,7 @@
+name: 'GitHub Action'
+description: ''
+runs:
+  using: 'composite'
+  steps: 
+    - run: echo 'Hello World'
+      shell: bash
