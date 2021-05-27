@@ -107,6 +107,9 @@ case "$command" in
     rebase)
         ISSUE_NUMBER=$(git branch --show-current)
         ISSUE_TITLE=$(gh issue view $ISSUE_NUMBER | rgx r '(.*)title:\s*([^\n]+)(.*)/$2')
+        git switch dev
+        git pull
+        git switch $ISSUE_NUMBER
         DEV_COMMITS_COUNT=$(git rev-list --count $ISSUE_NUMBER..dev)
         BRANCH_COMMITS_COUNT=$(git rev-list --count dev..$ISSUE_NUMBER)
         if [ $DEV_COMMITS_COUNT -eq 0 ] && [ $BRANCH_COMMITS_COUNT -lt 2 ]; then
