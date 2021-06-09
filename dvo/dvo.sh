@@ -74,15 +74,13 @@ case "$command" in
 
         git init --initial-branch=main
         git add .
-        git commit -m '0.0.0'
+        git commit -m 'init'
 
         gh repo create $PROJECT_KEBAB_NAME
         git push --set-upstream origin main
-        git switch --create dev
-        git push --set-upstream origin dev
         ;;
     switch)
-        git switch dev
+        git switch main
         git pull
         git $ARGS
 
@@ -107,12 +105,12 @@ case "$command" in
     rebase)
         ISSUE_NUMBER=$(git branch --show-current)
         ISSUE_TITLE=$(gh issue view $ISSUE_NUMBER | rgx r '(.*)title:\s*([^\n]+)(.*)/$2')
-        git switch dev
+        git switch main
         git pull
         git switch $ISSUE_NUMBER
-        DEV_COMMITS_COUNT=$(git rev-list --count $ISSUE_NUMBER..dev)
-        BRANCH_COMMITS_COUNT=$(git rev-list --count dev..$ISSUE_NUMBER)
-        if [ $DEV_COMMITS_COUNT -eq 0 ] && [ $BRANCH_COMMITS_COUNT -lt 2 ]; then
+        MAIN_COMMITS_COUNT=$(git rev-list --count $ISSUE_NUMBER..main)
+        BRANCH_COMMITS_COUNT=$(git rev-list --count main..$ISSUE_NUMBER)
+        if [ $MAIN_COMMITS_COUNT -eq 0 ] && [ $BRANCH_COMMITS_COUNT -lt 2 ]; then
             echo "nothing to rebase"
             if [ $BRANCH_COMMITS_COUNT -eq 1 ]; then
                 LAST_COMMIT_MESSAGE=$(git show -s --format=%s)
@@ -130,7 +128,7 @@ case "$command" in
         set +e
         NEW_STASH_COUNT=$(git rev-list --walk-reflogs --count refs/stash)
         set -e
-        git reset $(git merge-base dev $ISSUE_NUMBER)
+        git reset $(git merge-base main $ISSUE_NUMBER)
         git add -A
         set +e
         git commit -m "#$ISSUE_NUMBER $ISSUE_TITLE"
@@ -138,7 +136,7 @@ case "$command" in
         if [ "$NEW_STASH_COUNT" != "$STASH_COUNT" ]; then
             git stash pop --quiet
         fi
-        git pull --rebase origin dev
+        git pull --rebase origin main
         ;;
     pr)
         $0 rebase
@@ -150,7 +148,7 @@ case "$command" in
         if [ $PR_RESULT -ne 0 ]; then
             ISSUE_NUMBER=$(git branch --show-current)
             ISSUE_TITLE=$(gh issue view $ISSUE_NUMBER | rgx r '(.*)title:\s*([^\n]+)(.*)/$2')
-            gh pr create --base dev --title "#$ISSUE_NUMBER $ISSUE_TITLE" --body '' 
+            gh pr create --base main --title "#$ISSUE_NUMBER $ISSUE_TITLE" --body '' 
         fi
         ;;
     merge)
@@ -159,7 +157,7 @@ case "$command" in
         gh pr merge --squash
         git push origin --delete $ISSUE_NUMBER
         gh issue close $ISSUE_NUMBER
-        git switch dev
+        git switch main
         git branch --delete $ISSUE_NUMBER --force
         ;;
     *)
