@@ -52,7 +52,7 @@ case "$command" in
             cd ..
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,visualstudiocode > .gitignore
         elif [ "$PROJECT_TYPE" = 'githubaction' ]; then
-            curl https://raw.githubusercontent.com/greg-chuchro/dvo/dev/dvo/resources/github-action.yaml > action.yml
+            curl https://raw.githubusercontent.com/greg-chuchro/dvo/main/dvo/resources/github-action.yaml > action.yml
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,visualstudiocode > .gitignore
         else
             TEST_PROJECT_NAME=$PROJECT_NAME"Test"
