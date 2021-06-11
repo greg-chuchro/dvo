@@ -16,57 +16,62 @@ fi
 shift
 case "$command" in
     new)
-        PROJECT_TYPE=$1;
-        if [ "$PROJECT_TYPE" = '' ]; then
+        TEMPLATE_TYPE=$1;
+        if [ "$TEMPLATE_TYPE" = '' ]; then
             dotnet $ARGS
             exit 0
         fi
         shift
 
-        PROJECT_NAME=''
+        TEMPLATE_OUTPUT_NAME=''
         while getopts "n:" option; do
             case ${option} in
                 n)
-                    PROJECT_NAME=$OPTARG
+                    TEMPLATE_OUTPUT_NAME=$OPTARG
                     ;;
             esac
         done
         shift $((OPTIND -1))
-        if [ "$PROJECT_NAME" = '' ]; then
+        if [ "$TEMPLATE_OUTPUT_NAME" = '' ]; then
             dotnet $ARGS
             exit 0
         fi
 
-        PROJECT_KEBAB_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[_ ]/-' | rgx r '\./')
-        PROJECT_SNAKE_NAME=$(echo $PROJECT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[- ]/_' | rgx r '\./')
+        PROJECT_KEBAB_NAME=$(echo $TEMPLATE_OUTPUT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[_ ]/-' | rgx r '\./')
+        PROJECT_SNAKE_NAME=$(echo $TEMPLATE_OUTPUT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[- ]/_' | rgx r '\./')
 
         cd ~/"repos/$(git config user.name)"
         mkdir $PROJECT_KEBAB_NAME
         cd $PROJECT_KEBAB_NAME
 
-        if [ "$PROJECT_TYPE" = 'shell' ]; then
-            mkdir $PROJECT_NAME
-            cd $PROJECT_NAME
+        if [ "$TEMPLATE_TYPE" = 'shell' ]; then
+            mkdir $TEMPLATE_OUTPUT_NAME
+            cd $TEMPLATE_OUTPUT_NAME
             touch $PROJECT_SNAKE_NAME".sh"
             chmod +x $PROJECT_SNAKE_NAME".sh"
             cd ..
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,visualstudiocode > .gitignore
-        elif [ "$PROJECT_TYPE" = 'githubaction' ]; then
+        elif [ "$TEMPLATE_TYPE" = 'githubaction' ]; then
             curl https://raw.githubusercontent.com/greg-chuchro/dvo/main/dvo/resources/github-action.yaml > action.yml
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,visualstudiocode > .gitignore
-        else
-            TEST_PROJECT_NAME=$PROJECT_NAME"Test"
-            PROJECT_FILE=$PROJECT_NAME"/"$PROJECT_NAME".csproj"
+        elif [ "$TEMPLATE_TYPE" = 'Console Application' ] || [ "$TEMPLATE_TYPE" = 'console' ] || [ "$TEMPLATE_TYPE" = 'Class library' ] || [ "$TEMPLATE_TYPE" = 'classlib' ]; then
+            TEST_PROJECT_NAME=$TEMPLATE_OUTPUT_NAME"Test"
+            PROJECT_FILE=$TEMPLATE_OUTPUT_NAME"/"$TEMPLATE_OUTPUT_NAME".csproj"
             TEST_PROJECT_FILE=$TEST_PROJECT_NAME"/"$TEST_PROJECT_NAME".csproj"
-            SOLUTION_FILE=$PROJECT_NAME".sln"
+            SOLUTION_FILE=$TEMPLATE_OUTPUT_NAME".sln"
 
-            dotnet new $PROJECT_TYPE -n $PROJECT_NAME
+            dotnet new "$TEMPLATE_TYPE" -n $TEMPLATE_OUTPUT_NAME
             dotnet new xunit -n $TEST_PROJECT_NAME
-            dotnet new sln -n $PROJECT_NAME
+            dotnet new sln -n $TEMPLATE_OUTPUT_NAME
             dotnet add $TEST_PROJECT_FILE reference $PROJECT_FILE
             dotnet sln $SOLUTION_FILE add $PROJECT_FILE $TEST_PROJECT_FILE
 
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,dotnetcore,monodevelop,visualstudio,visualstudiocode,rider > .gitignore
+
+            mkdir -p .github/workflows
+            curl https://raw.githubusercontent.com/greg-chuchro/dvo/main/dvo/resources/seqflow-merge.yaml > .github/workflows/seqflow-merge.yaml
+        else
+            dotnet new "$TEMPLATE_TYPE" -n $TEMPLATE_OUTPUT_NAME
         fi
 
         curl https://raw.githubusercontent.com/github/choosealicense.com/gh-pages/_licenses/mit.txt | rgx r '---.*---\s*/' | rgx r "\[year\]/$(date +%Y)" | rgx r "\[fullname\]/$(git config user.name)" > LICENSE.txt
