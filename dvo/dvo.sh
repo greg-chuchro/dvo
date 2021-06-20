@@ -37,8 +37,8 @@ case "$command" in
             exit 0
         fi
 
-        PROJECT_KEBAB_NAME=$(echo $TEMPLATE_OUTPUT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[_ ]/-' | rgx r '\./')
-        PROJECT_SNAKE_NAME=$(echo $TEMPLATE_OUTPUT_NAME | rgx r '(([a-z])([A-Z]))|(\B[A-Z][a-z])/$2-$3$4' | rgx r '(.*)/\L$1' | rgx r '[- ]/_' | rgx r '\./')
+        PROJECT_KEBAB_NAME=$(echo $TEMPLATE_OUTPUT_NAME | rgx r '([a-z0-9])([A-Z])/$1-$2' | rgx r '([a-zA-Z0-9])([A-Z][a-z])/$1-$2' | rgx r '(.*)/\L$1' | rgx r '[. ]/-')
+        PROJECT_SNAKE_NAME=$(echo $TEMPLATE_OUTPUT_NAME | rgx r '([a-z0-9])([A-Z])/$1_$2' | rgx r '([a-zA-Z0-9])([A-Z][a-z])/$1_$2' | rgx r '(.*)/\L$1' | rgx r '[. ]/_')
 
         cd ~/"repos/$(git config user.name)"
         mkdir $PROJECT_KEBAB_NAME
