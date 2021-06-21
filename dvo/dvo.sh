@@ -66,6 +66,11 @@ case "$command" in
             dotnet add $TEST_PROJECT_FILE reference $PROJECT_FILE
             dotnet sln $SOLUTION_FILE add $PROJECT_FILE $TEST_PROJECT_FILE
 
+            echo "$(rgx r '(<PropertyGroup>)/$1\r\n    <Nullable>enable<\/Nullable>' $PROJECT_FILE)" > $PROJECT_FILE
+            echo "$(rgx r "(<\/PropertyGroup>)/  <RootNamespace>$TEMPLATE_OUTPUT_NAME<\/RootNamespace>\r\n  \$1" $PROJECT_FILE)" > $PROJECT_FILE
+            echo "$(rgx r "(<\/PropertyGroup>)/  <PackageId>$TEMPLATE_OUTPUT_NAME<\/PackageId>\r\n  \$1" $PROJECT_FILE)" > $PROJECT_FILE
+            echo "$(rgx r '(<\/PropertyGroup>)/  <Version>0.0.0<\/Version>\r\n  $1' $PROJECT_FILE)" > $PROJECT_FILE
+
             curl https://www.toptal.com/developers/gitignore/api/linux,macos,windows,dotnetcore,monodevelop,visualstudio,visualstudiocode,rider > .gitignore
 
             mkdir -p .github/workflows
